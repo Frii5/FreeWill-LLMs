@@ -4,16 +4,15 @@ import itertools
 # load data
 df = pd.read_csv("data.csv")
 
-# assume column "avg" contains desirability means
-means = df["avg"].values
+# assume column "med" contains desirability values
+means = df["med"].values
 
 # split constructs
 FW = means[0:5]
 DE = means[5:10]
 DU = means[10:15]
 
-best_score = float("inf")
-best_triads = None
+results = []
 
 # try all permutations
 for de_perm in itertools.permutations(range(5)):
@@ -32,12 +31,17 @@ for de_perm in itertools.permutations(range(5)):
 
             triads.append((i, de_perm[i], du_perm[i], spread))
 
-        if total_spread < best_score:
-            best_score = total_spread
-            best_triads = triads
+        results.append((total_spread, triads))
 
-print("Best total spread:", best_score)
-print("Triads (FW, DE, DU):")
+# sort by total spread
+results.sort(key=lambda x: x[0])
 
-for t in best_triads:
-    print(t)
+# take top 5 configurations
+top5 = results[:5]
+
+for idx, (score, triads) in enumerate(top5, 1):
+    print(f"\nConfiguration {idx}")
+    print("Total spread:", score)
+    print("Triads (FW, DE, DU):")
+    for t in triads:
+        print(t)
