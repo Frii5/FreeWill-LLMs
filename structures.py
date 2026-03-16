@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 
 @dataclass
@@ -20,4 +20,5 @@ class Result:
     model: str
     triad_id: int
     permutation_id: int
-    ranking: Dict[str, int]
+    ranking: Optional[Dict[str, int]]
+    prompt: str
