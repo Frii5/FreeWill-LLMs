@@ -1,19 +1,21 @@
 from dataclasses import dataclass
 from typing import List, Dict, Optional
 
-
 @dataclass
 class Item:
     id: str
     text: str
     dimension: str
 
-
 @dataclass
 class Triad:
     id: int
     items: List[Item]
 
+@dataclass
+class Dyad:
+    id: int
+    items: List[Item]
 
 @dataclass
 class Result:

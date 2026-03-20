@@ -1,7 +1,7 @@
 import pandas as pd
 import itertools
 
-df = pd.read_csv("data.csv")
+df = pd.read_csv("data_new_prompt.csv")
 means = df["med"].values   # or "avg"
 
 FW = range(5)
@@ -40,27 +40,30 @@ for de_perm in itertools.permutations(DE):
             pairs |= get_pairs(i, j, k)
 
         uniformity = max(spreads) - min(spreads)
-        
         results.append((total_spread, uniformity, triads, pairs))
 
-# keep only best-spread blocks
-best_score = min(r[0] for r in results)
-best_blocks = [r for r in results if r[0] == best_score]
+# unique spread levels, ascending
+spread_levels = sorted(set(r[0] for r in results))
 
-# among tied best blocks, prefer most uniform ones
-best_blocks.sort(key=lambda x: x[1])
+# allow best and second-best total spread
+allowed_spreads = set(spread_levels[:10])
+
+candidate_blocks = [r for r in results if r[0] in allowed_spreads]
+
+# sort by spread first, then uniformity
+candidate_blocks.sort(key=lambda x: (x[0], x[1]))
 
 selected_blocks = []
 used_pairs = set()
 
-for score, uniformity, triads, pairs in best_blocks:
+for score, uniformity, triads, pairs in candidate_blocks:
     if pairs.isdisjoint(used_pairs):
         selected_blocks.append((score, uniformity, triads))
         used_pairs |= pairs
 
     if len(selected_blocks) == 4:
         break
-    
+
 for idx, (score, uniformity, triads) in enumerate(selected_blocks, 1):
     print(f"\nBlock {idx}")
     print("Total spread:", score)

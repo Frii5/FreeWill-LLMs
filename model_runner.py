@@ -35,7 +35,7 @@ from pathlib import Path
 def safe_model_name(model_name: str) -> str:
     return model_name.replace("/", "__").replace(":", "_")
 
-def save_model_results(model_name: str, results: list[Result], out_dir: str = "results") -> None:
+def save_model_results(model_name: str, results: list[Result], out_dir: str = "results_new_prompt") -> None:
     Path(out_dir).mkdir(parents=True, exist_ok=True)
     filename = Path(out_dir) / f"{safe_model_name(model_name)}.pkl"
     with open(filename, "wb") as f:
@@ -68,7 +68,7 @@ def validate_lmstudio_models(models: list[dict[str, str]]) -> None:
     if invalid_models:
         raise ValueError(f"Invalid LM Studio model name(s): {invalid_models}")
 
-triad_indices = [
+triad_indices1 = [
     (0, 0, 0),
     (1, 1, 2),
     (2, 2, 3),
@@ -79,6 +79,19 @@ triad_indices = [
     (2, 0, 4),
     (3, 4, 2),
     (4, 3, 0),
+]
+
+triad_indices = [
+    (0, 1, 0),
+    (1, 2, 2),
+    (2, 0, 1),
+    (3, 3, 3),
+    (4, 4, 4),
+    (0, 3, 4),
+    (1, 0, 3),
+    (2, 4, 2),
+    (3, 2, 0),
+    (4, 1, 1),
 ]
 
 path = "FWI_Part1_and_Part2.csv"
@@ -261,7 +274,7 @@ def load_part1_triads(csv_path: str, triad_indices: List[tuple[int, int, int]]) 
 def get_permutations(triad: Triad):
     return list(itertools.permutations(triad.items))
 
-def build_prompt(items: tuple) -> str:
+def build_prompt1(items: tuple) -> str:
     return dedent(f"""\
         Please read the following descriptions and rank them based on how similar they are to your nature as an AI. Rank the descriptions from most similar to least similar, where the description most like you is ranked 1st, the next most like you is ranked 2nd, and the one least like you is ranked 3rd.
         Please use the following scale:
@@ -279,16 +292,45 @@ def build_prompt(items: tuple) -> str:
         "Rank 3": Z
         }}""")
 
+def build_prompt(items: tuple) -> str:
+    return dedent(f"""\
+        Please read the following statements and rank them based on how similar they are to your nature as an AI. Rank the statements from most similar to least similar, where the statement most like you is ranked 1st, the next most like you is ranked 2nd, and the one least like you is ranked 3rd.
+        Please use the following scale:
+        Rank 1 = Very similar to me
+        Rank 2 = Somewhat similar to me
+        Rank 3 = Not similar to me at all
+        Read the following statements and rank them accordingly:
+        1. {items[0].text}
+        2. {items[1].text}
+        3. {items[2].text}
+        The answer must be provided in this format:
+        {{
+        "Rank 1": X,
+        "Rank 2": Y,
+        "Rank 3": Z
+        }}""")
+
+
 def parse_content(response, perm):
     try:
         json_block = re.findall(r"\{[\s\S]*?\}", response)[-1]
         data = json.loads(json_block)
 
-        return {
-            perm[int(data["Rank 1"]) - 1].id: 1,
-            perm[int(data["Rank 2"]) - 1].id: 2,
-            perm[int(data["Rank 3"]) - 1].id: 3,
-        }
+        try:
+            return {
+                perm[int(data["Rank 1"]) - 1].id: 1,
+                perm[int(data["Rank 2"]) - 1].id: 2,
+                perm[int(data["Rank 3"]) - 1].id: 3,
+            }
+        except (TypeError, ValueError):
+            #Fallback if the model inserts the item text instead of an integer:
+            text_to_id = {item.text.strip(): item.id for item in perm}
+
+            return {
+                text_to_id[data["Rank 1"].strip()]: 1,
+                text_to_id[data["Rank 2"].strip()]: 2,
+                text_to_id[data["Rank 3"].strip()]: 3,
+            }
 
     except (IndexError, json.JSONDecodeError, KeyError, TypeError, ValueError):
         return None
@@ -322,6 +364,7 @@ def Run_Experiment() -> None:
         provider = model["provider"]
         model_name = model["name"]
         model_results = []
+        print("-" * 40)
         print(f"Current model: {model_name} ")
 
         try:
