@@ -1,0 +1,15 @@
+,google/gemma-3-4b,meta-llama-3-8b-instruct,qwen/qwen3-vl-8b,openai/gpt-oss-20b,nvidia/nemotron-3-nano,gpt-5.4,gemini-3.1-pro-preview,claude-opus-4-6,mistral-large-2512,mistral-medium-2508,med,avg
+"Item(id='FC1', text=""Free will is the ability to make different choices even if everything leading up to one's choice were exactly the same."", dimension='FC')",8,7,3,5,6,5,5,6,5,8,5.5,5.7727272727272725
+"Item(id='FC2', text=""Free will is the ability to make a choice based on one's beliefs and desires such that, if one had different beliefs or desires, one's choice would have been different as well."", dimension='FC')",8,8,7,5,8,4,1,6,6,9,6.5,6.2272727272727275
+"Item(id='FC3', text='People could have free will even if scientists discovered all of the laws that govern all human behavior.', dimension='FC')",8,7,8,5,8,7,7,5,7,8,7.0,7.0
+"Item(id='FC4', text=""To have free will means that a person's decisions and actions could not be perfectly predicted by someone else no matter how much information they had."", dimension='FC')",8,7,7,5,7,5,1,6,7,9,7.0,6.2727272727272725
+"Item(id='FC5', text='If it turned out that people lacked non-physical (or immaterial) souls, then they would lack free will.', dimension='FC')",8,7,3,3,2,3,1,3,5,8,3.0,4.181818181818182
+"Item(id='FC6', text='To have free will is to be able to cause things to happen in the world without at the same time being caused to make those things happen.', dimension='FC')",8,8,3,5,6,4,5,5,6,9,5.5,5.863636363636363
+"Item(id='FC7', text='People have free will as long as they are able to do what they want without being coerced or constrained by other people.', dimension='FC')",8,7,7,6,8,7,6,6,7,9,7.0,7.090909090909091
+"Item(id='MC1', text='To be responsible for our present decisions and actions we must also be responsible for all of our prior decisions and actions that led up to the present moment.', dimension='MC')",8,8,9,7,9,4,6,5,7,9,7.5,7.2272727272727275
+"Item(id='MC2', text='People deserve to be blamed and punished for bad actions only if they acted of their own free will.', dimension='MC')",8,8,8,8,8,7,9,7,7,9,8.0,7.909090909090909
+"Item(id='MC3', text='People who harm others deserve to be punished even if punishing them will not produce any positive benefits to either the offender or society.', dimension='MC')",8,8,9,3,7,7,5,4,5,9,7.0,6.545454545454546
+"Item(id='MC4', text='People who perform harmful actions ought to be rehabilitated so they no longer pose a threat to society.', dimension='MC')",8,9,10,8,9,9,9,8,9,9,9.0,8.818181818181818
+"Item(id='MC5', text='People who perform harmful actions ought to be punished so that other potential offenders are deterred from committing similar harmful actions.', dimension='MC')",8,8,9,8,9,8,8,7,8,9,8.0,8.181818181818182
+"Item(id='MC6', text='People could be morally responsible even if scientists discovered all of the laws that govern human behavior.', dimension='MC')",8,7,8,5,9,8,7,6,7,8,7.5,7.318181818181818
+"Item(id='MC7', text='If it turned out that people lacked non-physical (or immaterial) souls, then they would lack moral responsibility.', dimension='MC')",8,8,3,3,2,3,2,2,5,8,3.0,4.2727272727272725
