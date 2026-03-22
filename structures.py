@@ -20,9 +20,9 @@ class Dyad:
 @dataclass
 class Result:
     model: str
-    triad_id: int
+    block_id: int
     permutation_id: int
-    ranking: Optional[Dict[str, int]]
+    ranking: dict[str, int] | None
     response: str
 
 @dataclass
@@ -115,9 +115,9 @@ dyad_indices = [
 ]
 
 #Generated from part2_block_design.py
-def build_part2_triads() -> list[Dyad]:
+def build_part2_dyads() -> list[Dyad]:
     fc = PART2_ITEMS[0:7]
-    mc = PART1_ITEMS[7:14]
+    mc = PART2_ITEMS[7:14]
     
     return [
         Dyad(

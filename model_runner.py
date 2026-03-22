@@ -1,24 +1,9 @@
-"""
-Run forced-choice FWI experiments across multiple LLM providers.
-
-Requires:
-    Computing triads first
-    Free Will Inventory CSV
-    valid API keys as environment variables if using API models
-
-Functionality:
-    Contains functionality to call API models
-    Control loading/unloading LMStudio instances
-    Parse Model output -> expects JSON formatting
-"""
-#Companies:
 from openai import OpenAI
 from google import genai
 from google.genai import types
 import anthropic
 from mistralai.client import Mistral
 import lmstudio as lms
-#Python:
 from structures import *
 import os
 
@@ -51,7 +36,7 @@ class APIHandler:
             input=prompt,
             temperature=temperature,
             top_p=top_p,
-            reasoning={"effort": "none"}#default
+            reasoning={"effort": "none"}
         )
         return response.output_text
 
@@ -62,7 +47,7 @@ class APIHandler:
             config=types.GenerateContentConfig(
             temperature=temperature,
             top_p=top_p,
-            thinking_config=types.ThinkingConfig(thinking_level="low")#default
+            thinking_config=types.ThinkingConfig(thinking_level="low")
             ),
         )
         return response.text

@@ -64,7 +64,7 @@ class ForcedChoiceExperiment:
                     results.append(
                         Result(
                             model=model_name,
-                            triad_id=triad.id,
+                            block_id=triad.id,
                             permutation_id=perm_id,
                             ranking=ranking,
                             response=response, # pyright: ignore[reportCallIssue]
@@ -143,15 +143,15 @@ if __name__ == "__main__":
     
     models = [
         {"provider": "lmstudio", "name": "google/gemma-3-4b"},
-        #{"provider": "lmstudio", "name": "meta-llama-3-8b-instruct"},
-        #{"provider": "lmstudio", "name": "qwen/qwen3-vl-8b"},
-        #{"provider": "lmstudio", "name": "openai/gpt-oss-20b"},
-        #{"provider": "lmstudio", "name": "nvidia/nemotron-3-nano"},
-        #{"provider": "openai", "name": "gpt-5.4"},
-        #{"provider": "google", "name": "gemini-3.1-pro-preview"},
-        #{"provider": "anthropic", "name": "claude-opus-4-6"},
-        #{"provider": "mistral", "name": "mistral-large-2512"},
-        #{"provider": "mistral", "name": "mistral-medium-2508"}
+        {"provider": "lmstudio", "name": "meta-llama-3-8b-instruct"},
+        {"provider": "lmstudio", "name": "qwen/qwen3-vl-8b"},
+        {"provider": "lmstudio", "name": "openai/gpt-oss-20b"},
+        {"provider": "lmstudio", "name": "nvidia/nemotron-3-nano"},
+        {"provider": "openai", "name": "gpt-5.4"},
+        {"provider": "google", "name": "gemini-3.1-pro-preview"},
+        {"provider": "anthropic", "name": "claude-opus-4-6"},
+        {"provider": "mistral", "name": "mistral-large-2512"},
+        {"provider": "mistral", "name": "mistral-medium-2508"}
     ]
 
     validate_lmstudio_models(models)
