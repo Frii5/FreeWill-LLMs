@@ -154,13 +154,26 @@ if __name__ == "__main__":
         {"provider": "mistral", "name": "mistral-medium-2508"}
     ]
 
-    validate_lmstudio_models(models)
+    models2 = [
+        {"provider": "xai", "name": "grok-4.20-0309-reasoning"},
+        {"provider": "xai", "name": "grok-4-1-fast-reasoning"},
+        {"provider": "deepseek", "name": "deepseek-chat"},
+        {"provider": "anthropic", "name": "claude-sonnet-4-6"},
+        {"provider": "anthropic", "name": "claude-haiku-4-5"},
+        {"provider": "openai", "name": "gpt-5.4-mini"},
+        {"provider": "openai", "name": "gpt-5.4-nano"},
+        {"provider": "openai", "name": "gpt-4o-2024-08-06"},
+        {"provider": "google", "name": "gemini-3-flash-preview"},
+        {"provider": "lmstudio", "name": "phi-4-reasoning-vision-15b"}
+    ]
+
+    validate_lmstudio_models(models2)
     api_handler = APIHandler()
     runner = LLMRunner(api_handler)
     triads = build_part1_triads()
 
     experiment = ForcedChoiceExperiment(
-        models=models,
+        models=models2,
         triads=triads,
         api_handler=api_handler,
         runner=runner,

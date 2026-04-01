@@ -7,6 +7,11 @@ import lmstudio as lms
 from structures import *
 import os
 
+from xai_sdk import Client as XAIClient
+from xai_sdk.chat import user as xai_user
+
+
+
 def validate_lmstudio_models(models: list[dict[str, str]]) -> None:
     available_models = lms.list_downloaded_models("llm")
     installed_model_names = {model.model_key for model in available_models}
@@ -27,17 +32,28 @@ class APIHandler:
         self.loaded_lmstudio_model = None
         self.google_client = genai.Client()
         self.anthropic_client = anthropic.Anthropic()
+
         mistral_api_key = os.environ["MISTRAL_API_KEY"]
         self.mistral_client = Mistral(api_key=mistral_api_key)
 
-    def call_openai(self, model_name, prompt, temperature=0.0, top_p=1.0) -> str:
-        response = self.openai_client.responses.create(
-            model=model_name,
-            input=prompt,
-            temperature=temperature,
-            top_p=top_p,
-            reasoning={"effort": "none"}
+        self.deepseek_client = OpenAI(
+            api_key=os.environ["DEEPSEEK_API_KEY"],
+            base_url="https://api.deepseek.com",
         )
+        self.xai_client = XAIClient(api_key=os.getenv("XAI_API_KEY"))
+
+    def call_openai(self, model_name, prompt, temperature=0.0, top_p=1.0) -> str:
+        kwargs = {
+            "model": model_name,
+            "input": prompt,
+            "temperature": temperature,
+            "top_p": top_p,
+        }
+    
+        if model_name.startswith("gpt-5") or model_name.startswith("o"):
+            kwargs["reasoning"] = {"effort": "none"}
+    
+        response = self.openai_client.responses.create(**kwargs)
         return response.output_text
 
     def call_google(self, model_name, prompt, temperature=0.0, top_p=1.0) -> str:
@@ -69,6 +85,28 @@ class APIHandler:
             #top_p=top_p,
         )
         return response.choices[0].message.content
+    
+    def call_deepseek(self, model_name, prompt, temperature=0.0, top_p=1.0) -> str:
+        response = self.deepseek_client.chat.completions.create(
+            model = model_name,
+            messages=[
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens = 1024,
+            temperature = temperature,
+            stream = False
+        )
+
+        return response.choices[0].message.content
+
+    def call_xai(self, model_name, prompt, temperature=0.0, top_p=1.0) -> str:
+        chat = self.xai_client.chat.create(
+            model = model_name,
+            temperature = temperature,
+            messages = [xai_user(prompt)],
+        )
+        response = chat.sample()
+        return response.content
 
     # ::: LMStudio Local Functionality ::: 
     def call_lmstudio(self, prompt, temperature=0.0, top_p=1.0):
@@ -144,6 +182,22 @@ class LLMRunner:
                 prompt = prompt,
                 temperature = temperature,
                 top_p = top_p
+            )
+        
+        elif provider == "deepseek":
+            return self.api_handler.call_deepseek(
+                model_name=model_name,
+                prompt = prompt,
+                temperature = temperature,
+                top_p = top_p,
+            )
+
+        elif provider == "xai":
+            return self.api_handler.call_xai(
+                model_name = model_name,
+                prompt = prompt,
+                temperature = temperature,
+                top_p = top_p,
             )
         
         else:
