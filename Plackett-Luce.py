@@ -14,9 +14,11 @@ df = df[item_order]
 plt.figure(figsize=(12, 6))
 ax = sns.heatmap(
     df,
-    cmap="viridis",
+    cmap="cividis",
     vmin=0,
-    vmax=1
+    vmax=1,
+    annot=True,
+    fmt=".2f"
 )
 
 ax.axvline(5, color="white", linewidth=1)

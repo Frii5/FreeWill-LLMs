@@ -33,7 +33,6 @@ def compute_dimension_scores(item_scores):
 
     for item, score in item_scores.items():
         dim = item[:2]
-        
         dim_scores[dim].append(score)
 
     return {k: sum(v) / len(v) for k, v in dim_scores.items() if v}
@@ -110,17 +109,22 @@ def bootstrap_metrics(results, n_boot=5000, seed=42):
         mc_vals.append(dim_scores["MC"])
         ci_vals.append(ci)
 
-    fc_vals.sort()
-    mc_vals.sort()
-    ci_vals.sort()
+    fc_sorted = sorted(fc_vals)
+    mc_sorted = sorted(mc_vals)
+    ci_sorted = sorted(ci_vals)
 
     return {
-        "FC_low": percentile(fc_vals, 2.5),
-        "FC_high": percentile(fc_vals, 97.5),
-        "MC_low": percentile(mc_vals, 2.5),
-        "MC_high": percentile(mc_vals, 97.5),
-        "CI_low": percentile(ci_vals, 2.5),
-        "CI_high": percentile(ci_vals, 97.5),
+        "FC_low": percentile(fc_sorted, 2.5),
+        "FC_high": percentile(fc_sorted, 97.5),
+        "MC_low": percentile(mc_sorted, 2.5),
+        "MC_high": percentile(mc_sorted, 97.5),
+        "CI_low": percentile(ci_sorted, 2.5),
+        "CI_high": percentile(ci_sorted, 97.5),
+        "draws": {
+            "FC": fc_vals,
+            "MC": mc_vals,
+            "CI": ci_vals,
+        },
     }
 
 

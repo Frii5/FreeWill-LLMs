@@ -177,6 +177,6 @@ if __name__ == "__main__":
         triads=triads,
         api_handler=api_handler,
         runner=runner,
-        out_dir="results_new_prompt",
+        out_dir="results_FC_part1",
     )
     experiment.run()

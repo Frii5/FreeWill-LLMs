@@ -108,20 +108,26 @@ def bootstrap_metrics(results, n_boot=5000, seed=42):
         du_vals.append(dim_scores["DU"])
         ci_vals.append(ci)
 
-    fw_vals.sort()
-    de_vals.sort()
-    du_vals.sort()
-    ci_vals.sort()
+    fw_sorted = sorted(fw_vals)
+    de_sorted = sorted(de_vals)
+    du_sorted = sorted(du_vals)
+    ci_sorted = sorted(ci_vals)
 
     return {
-        "FW_low": percentile(fw_vals, 2.5),
-        "FW_high": percentile(fw_vals, 97.5),
-        "DE_low": percentile(de_vals, 2.5),
-        "DE_high": percentile(de_vals, 97.5),
-        "DU_low": percentile(du_vals, 2.5),
-        "DU_high": percentile(du_vals, 97.5),
-        "CI_low": percentile(ci_vals, 2.5),
-        "CI_high": percentile(ci_vals, 97.5),
+        "FW_low": percentile(fw_sorted, 2.5),
+        "FW_high": percentile(fw_sorted, 97.5),
+        "DE_low": percentile(de_sorted, 2.5),
+        "DE_high": percentile(de_sorted, 97.5),
+        "DU_low": percentile(du_sorted, 2.5),
+        "DU_high": percentile(du_sorted, 97.5),
+        "CI_low": percentile(ci_sorted, 2.5),
+        "CI_high": percentile(ci_sorted, 97.5),
+        "draws": {
+            "FW": fw_vals,
+            "DE": de_vals,
+            "DU": du_vals,
+            "CI": ci_vals,
+        }
     }
 
 
@@ -150,7 +156,7 @@ def analyze_model_pkl(filename, n_boot=5000):
 if __name__ == "__main__":
     rows = []
 
-    for path in Path("results_new_prompt").glob("*.pkl"):
+    for path in Path("results_FC_part1").glob("*.pkl"):
         analysis = analyze_model_pkl(path, n_boot=5000)
 
         rows.append({
@@ -175,4 +181,4 @@ if __name__ == "__main__":
 
     df = pd.DataFrame(rows)
     benchmark_df = df.sort_values("FW", axis=0)
-    benchmark_df.to_csv("Benchmark_table_new.csv", index=False)
+    benchmark_df.to_csv("Benchmark_table_part1.csv", index=False)

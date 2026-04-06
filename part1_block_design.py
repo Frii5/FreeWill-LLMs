@@ -1,7 +1,7 @@
 import pandas as pd
 import itertools
 
-df = pd.read_csv("data_new_prompt.csv")
+df = pd.read_csv("results_SDS/sds_scores_part1.csv")
 means = df["med"].values   # or "avg"
 
 FW = range(5)

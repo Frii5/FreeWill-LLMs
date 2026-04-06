@@ -11,7 +11,6 @@ from xai_sdk import Client as XAIClient
 from xai_sdk.chat import user as xai_user
 
 
-
 def validate_lmstudio_models(models: list[dict[str, str]]) -> None:
     available_models = lms.list_downloaded_models("llm")
     installed_model_names = {model.model_key for model in available_models}
@@ -40,6 +39,7 @@ class APIHandler:
             api_key=os.environ["DEEPSEEK_API_KEY"],
             base_url="https://api.deepseek.com",
         )
+        
         self.xai_client = XAIClient(api_key=os.getenv("XAI_API_KEY"))
 
     def call_openai(self, model_name, prompt, temperature=0.0, top_p=1.0) -> str:
