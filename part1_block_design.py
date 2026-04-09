@@ -49,7 +49,7 @@ spread_levels = sorted(set(r[0] for r in results))
 allowed_spreads = set(spread_levels[:10])
 
 candidate_blocks = [r for r in results if r[0] in allowed_spreads]
-
+#candidate_blocks = results[:]
 # sort by spread first, then uniformity
 candidate_blocks.sort(key=lambda x: (x[0], x[1]))
 
@@ -70,3 +70,20 @@ for idx, (score, uniformity, triads) in enumerate(selected_blocks, 1):
     print("Uniformity:", uniformity)
     for t in triads:
         print(t)
+
+best_combo = None
+
+from itertools import combinations
+for combo in combinations(candidate_blocks, 4):
+    all_pairs = set()
+    ok = True
+    for _, _, _, pairs in combo:
+        if not all_pairs.isdisjoint(pairs):
+            ok = False
+            break
+        all_pairs |= pairs
+    if ok:
+        best_combo = combo
+        break
+
+print(best_combo is not None)

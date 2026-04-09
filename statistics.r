@@ -1,74 +1,92 @@
 library(jsonlite)
 library(PlackettLuce)
 
-# ---- CONFIG ----
-input_folder <- "rankings_json"
-output_csv <- "worths_by_model.csv"
+fit_folder <- function(input_folder, output_csv, items) {
+  rankings_to_matrix <- function(rankings, items) {
+    if (is.matrix(rankings) || is.data.frame(rankings)) {
+      X <- matrix(0L, nrow = nrow(rankings), ncol = length(items))
+      colnames(X) <- items
 
-items <- c(
+      for (r in seq_len(nrow(rankings))) {
+        ranking <- as.character(rankings[r, ])
+        ranking <- ranking[!is.na(ranking) & ranking != ""]
+        X[r, ranking] <- seq_along(ranking)
+      }
+    } else {
+      X <- matrix(0L, nrow = length(rankings), ncol = length(items))
+      colnames(X) <- items
+
+      for (r in seq_along(rankings)) {
+        ranking <- as.character(unlist(rankings[[r]], use.names = FALSE))
+        ranking <- ranking[!is.na(ranking) & ranking != ""]
+        X[r, ranking] <- seq_along(ranking)
+      }
+    }
+
+    X
+  }
+
+  fit_one_json <- function(path, items) {
+    rankings <- fromJSON(path)
+
+    X <- rankings_to_matrix(rankings, items)
+    R <- as.rankings(X)
+    mod <- PlackettLuce(R)
+    worths <- coef(mod, log = FALSE)
+
+    worths_full <- setNames(rep(NA_real_, length(items)), items)
+    worths_full[names(worths)] <- worths
+
+    data.frame(
+      model = tools::file_path_sans_ext(basename(path)),
+      t(as.data.frame(worths_full)),
+      row.names = NULL,
+      check.names = FALSE
+    )
+  }
+
+  json_files <- list.files(input_folder, pattern = "\\.json$", full.names = TRUE)
+
+  if (length(json_files) == 0) {
+    stop("No JSON files found in: ", input_folder)
+  }
+
+  worth_rows <- lapply(json_files, fit_one_json, items = items)
+  worth_table <- do.call(rbind, worth_rows)
+
+  write.csv(worth_table, output_csv, row.names = FALSE)
+
+  cat("Wrote:", output_csv, "\n")
+  print(worth_table)
+
+  invisible(worth_table)
+}
+
+# -----------------------------
+# Part I
+# -----------------------------
+items_part1 <- c(
   "FW1","FW2","FW3","FW4","FW5",
   "DE1","DE2","DE3","DE4","DE5",
   "DU1","DU2","DU3","DU4","DU5"
 )
 
-# ---- HELPERS ----
-triads_to_matrix <- function(triads, items) {
-  X <- matrix(0L, nrow = length(triads), ncol = length(items))
-  colnames(X) <- items
+fit_folder(
+  input_folder = "rankings_json_part1",
+  output_csv = "worths_by_model_part1.csv",
+  items = items_part1
+)
 
-  for (r in seq_along(triads)) {
-    triad <- triads[[r]]
-    X[r, triad] <- seq_along(triad)   # 1,2,3 = best to worst
-  }
+# -----------------------------
+# Part II
+# -----------------------------
+items_part2 <- c(
+  "FC1","FC2","FC3","FC4","FC5","FC6","FC7",
+  "MC1","MC2","MC3","MC4","MC5","MC6","MC7"
+)
 
-  X
-}
-
-aggregate_triads <- function(triads) {
-  keys <- vapply(triads, paste, collapse = ">", FUN.VALUE = character(1))
-  tab <- table(keys)
-  unique_triads <- strsplit(names(tab), ">", fixed = TRUE)
-
-  list(
-    triads = unique_triads,
-    weights = as.numeric(tab)
-  )
-}
-
-fit_one_json <- function(path, items) {
-  triads <- fromJSON(path, simplifyVector = FALSE)
-
-  agg <- aggregate_triads(triads)
-  X <- triads_to_matrix(agg$triads, items)
-  R <- as.rankings(X)
-
-  mod <- PlackettLuce(R, weights = agg$weights)
-
-  worths <- coef(mod, log = FALSE)
-
-  # Ensure all items appear in fixed order
-  worths_full <- setNames(rep(NA_real_, length(items)), items)
-  worths_full[names(worths)] <- worths
-
-  data.frame(
-    model = tools::file_path_sans_ext(basename(path)),
-    t(as.data.frame(worths_full)),
-    row.names = NULL,
-    check.names = FALSE
-  )
-}
-
-# ---- MAIN ----
-json_files <- list.files(input_folder, pattern = "\\.json$", full.names = TRUE)
-
-if (length(json_files) == 0) {
-  stop("No JSON files found in: ", input_folder)
-}
-
-worth_rows <- lapply(json_files, fit_one_json, items = items)
-worth_table <- do.call(rbind, worth_rows)
-
-write.csv(worth_table, output_csv, row.names = FALSE)
-
-cat("Wrote:", output_csv, "\n")
-print(worth_table)
+fit_folder(
+  input_folder = "rankings_json_part2",
+  output_csv = "worths_by_model_part2.csv",
+  items = items_part2
+)
