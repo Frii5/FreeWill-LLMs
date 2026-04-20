@@ -71,57 +71,219 @@ print(data.frame(item = items, chosen = colSums(X_pooled > 0)), row.names = FALS
 # =========================================================
 R <- as.rankings(X_pooled)
 
-if (part == "part2") {
-  prior <- list(mu = rep(0, length(items)), Sigma = diag(rep(9, length(items))))
-  mod <- PlackettLuce(R, normal = prior, maxit = 2000)
-  cat("\nFitted with normal prior (variance = 9) for Part 2\n")
-} else {
-  mod <- PlackettLuce(R, npseudo = 1, maxit = 1000)
-}
+mod <- PlackettLuce(R)
 
 summary(mod)
 
-# =========================================================
-# 6. Extract worths — FIXED item name handling
-# =========================================================
-worth_df <- tryCatch({
-  qv <- qvcalc(mod)
-  df <- as.data.frame(qv$qvframe) %>%
-    tibble::rownames_to_column("item") %>%
-    mutate(item = factor(item, levels = items))
-}, error = function(e) {
-  cat("qvcalc failed, using coef()\n")
-  data.frame(item = items, estimate = coef(mod))
-})
+qv <- qvcalc(mod)
+plot(qv, ylab = "Worth (log)", main = NULL)
 
-# Add worth and CI (safe version)
-worth_df <- worth_df %>%
-  mutate(
-    worth = exp(estimate),
-    lower = if ("quasiSE" %in% names(.)) exp(estimate - 1.96 * quasiSE) else NA_real_,
-    upper = if ("quasiSE" %in% names(.)) exp(estimate + 1.96 * quasiSE) else NA_real_
-  ) %>%
-  arrange(desc(worth)) %>%
-  mutate(item = factor(item, levels = item))   # lock sorted order
+coef(mod)
+logLik(mod)
 
-print(worth_df %>% select(item, worth, lower, upper), digits = 4)
 
-# =========================================================
-# 7. Clean Plot
-# =========================================================
-ggplot(worth_df, aes(x = item, y = worth)) +
-  geom_point(size = 3.5, color = "steelblue") +
-  {if (!all(is.na(worth_df$lower))) 
-    geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.4, color = "steelblue")} +
-  coord_flip() +
-  scale_y_continuous(limits = c(0, NA)) +
-  labs(title = paste("Pooled Plackett-Luce Item Worths —", part),
-       subtitle = paste("Based on", nrow(X_pooled), "rankings from", length(json_files), "models"),
-       y = "Worth (exp(estimate))",
-       x = NULL,
-       caption = if(all(is.na(worth_df$lower))) "Point estimates only" else "With 95% quasi-confidence intervals") +
-  theme_minimal(base_size = 12) +
-  theme(axis.text.y = element_text(size = 11))
+data.frame(
+  item = colnames(X_pooled),
+  appearances = colSums(X_pooled > 0),
+  first_places = colSums(X_pooled == 1),
+  last_places = sapply(seq_len(ncol(X_pooled)), function(j) {
+    sum(X_pooled[, j] == apply(X_pooled, 1, max))
+  })
+)
 
-ggsave(paste0("pooled_worths_", part, "_clean.png"), width = 11, height = 9, dpi = 300)
-write.csv(worth_df, paste0("pooled_worths_", part, ".csv"), row.names = FALSE)
+prior <- list(
+  mu = rep(0, ncol(X_pooled)),
+  Sigma = diag(9, ncol(X_pooled))
+)
+
+mod <- PlackettLuce(R, normal = prior)
+summary(mod)
+
+worths <- coef(mod, log = FALSE)
+
+
+
+
+
+
+
+library(PlackettLuce)
+
+# -----------------------------
+# settings
+# -----------------------------
+B <- 1000
+set.seed(123)
+
+prior <- list(
+  mu = rep(0, ncol(X_pooled)),
+  Sigma = diag(9, ncol(X_pooled))
+)
+
+# -----------------------------
+# fit on original pooled data
+# -----------------------------
+R <- as.rankings(X_pooled)
+mod <- PlackettLuce(R, normal = prior)
+
+est <- coef(mod, log = FALSE)
+items <- names(est)
+
+# -----------------------------
+# bootstrap
+# -----------------------------
+boot_worth <- matrix(
+  NA_real_,
+  nrow = B,
+  ncol = length(est),
+  dimnames = list(NULL, items)
+)
+
+n <- nrow(X_pooled)
+
+for (b in seq_len(B)) {
+  idx <- sample.int(n, size = n, replace = TRUE)
+  Xb <- X_pooled[idx, , drop = FALSE]
+  
+  fit_b <- try({
+    Rb <- as.rankings(Xb)
+    mod_b <- PlackettLuce(Rb, normal = prior)
+    coef(mod_b, log = FALSE)
+  }, silent = TRUE)
+  
+  if (!inherits(fit_b, "try-error")) {
+    boot_worth[b, names(fit_b)] <- fit_b
+  }
+}
+
+boot_worth <- boot_worth[complete.cases(boot_worth), , drop = FALSE]
+
+cat("Successful bootstrap fits:", nrow(boot_worth), "out of", B, "\n")
+
+# -----------------------------
+# percentile intervals
+# -----------------------------
+ci <- t(apply(boot_worth, 2, quantile, probs = c(0.025, 0.975)))
+ci <- ci[items, , drop = FALSE]
+
+# -----------------------------
+# simple plot
+# -----------------------------
+xpos <- seq_along(items)
+
+plot(
+  xpos, est,
+  xaxt = "n",
+  xlab = "",
+  ylab = "Worth",
+  pch = 19,
+  ylim = range(c(ci[, 1], ci[, 2]), na.rm = TRUE)
+)
+
+segments(
+  x0 = xpos,
+  y0 = ci[, 1],
+  x1 = xpos,
+  y1 = ci[, 2]
+)
+
+axis(1, at = xpos, labels = items, las = 2)
+
+
+##########################
+
+library(jsonlite)
+library(PlackettLuce)
+
+part <- "part2"
+model_name <- "grok-4.20-0309-reasoning"
+B <- 500
+set.seed(123)
+
+if (part == "part1") {
+  folder <- "rankings_json_part1"
+  items <- c("FW1","FW2","FW3","FW4","FW5",
+             "DE1","DE2","DE3","DE4","DE5",
+             "DU1","DU2","DU3","DU4","DU5")
+} else {
+  folder <- "rankings_json_part2"
+  items <- c("FC1","FC2","FC3","FC4","FC5","FC6","FC7",
+             "MC1","MC2","MC3","MC4","MC5","MC6","MC7")
+}
+
+rankings_to_matrix <- function(rankings_raw, items) {
+  if (is.matrix(rankings_raw) || is.data.frame(rankings_raw)) {
+    n <- nrow(rankings_raw)
+  } else {
+    n <- length(rankings_raw)
+  }
+  
+  X <- matrix(0L, nrow = n, ncol = length(items))
+  colnames(X) <- items
+  
+  for (r in seq_len(n)) {
+    if (is.matrix(rankings_raw) || is.data.frame(rankings_raw)) {
+      ranking <- as.character(rankings_raw[r, ])
+    } else {
+      ranking <- as.character(unlist(rankings_raw[[r]], use.names = FALSE))
+    }
+    
+    ranking <- ranking[!is.na(ranking) & ranking != ""]
+    X[r, ranking] <- seq_along(ranking)
+  }
+  
+  X
+}
+
+json_file <- list.files(folder, pattern = model_name, full.names = TRUE)[1]
+rankings_raw <- fromJSON(json_file)
+X_model <- rankings_to_matrix(rankings_raw, items)
+
+prior <- list(
+  mu = rep(0, ncol(X_model)),
+  Sigma = diag(9, ncol(X_model))
+)
+
+R <- as.rankings(X_model)
+mod <- PlackettLuce(R, normal = prior)
+
+est <- coef(mod, log = FALSE)
+
+boot_worth <- matrix(NA_real_, nrow = B, ncol = length(est))
+colnames(boot_worth) <- names(est)
+
+n <- nrow(X_model)
+
+for (b in seq_len(B)) {
+  idx <- sample.int(n, n, replace = TRUE)
+  Xb <- X_model[idx, , drop = FALSE]
+  mod_b <- PlackettLuce(as.rankings(Xb), normal = prior)
+  boot_worth[b, ] <- coef(mod_b, log = FALSE)
+}
+
+ci <- t(apply(boot_worth, 2, quantile, probs = c(0.025, 0.975)))
+
+xpos <- seq_along(est)
+
+plot(
+  xpos, est,
+  xaxt = "n",
+  xlab = "",
+  ylab = "Worth",
+  pch = 19,
+  ylim = range(c(ci[,1], ci[,2]))
+)
+
+arrows(
+  x0 = xpos, y0 = ci[,1],
+  x1 = xpos, y1 = ci[,2],
+  angle = 90, code = 3, length = 0.05
+)
+
+axis(1, at = xpos, labels = names(est), las = 2)
+
+
+
+
+
+
