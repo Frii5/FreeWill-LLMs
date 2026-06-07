@@ -12,6 +12,7 @@ results = []
 def get_pair(i, j):
     return ("FC", i, "MC", j)
 
+# Fixing FC:
 for mc_perm in itertools.permutations(MC):
     dyads = []
     pairs = set()

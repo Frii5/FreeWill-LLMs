@@ -1,3 +1,10 @@
+"""
+Calculates Social Desirability Scores for Part I.
+Relies on model_runner.py to make API calls.
+
+Return:
+    SDS_scores csv.
+"""
 from pathlib import Path
 from textwrap import dedent
 import json
@@ -21,6 +28,7 @@ class SocialDesirabilityScoring:
         print("Starting Test:")
         results = {}
 
+        #Loop over each model:
         for model in self.models:
             provider = model["provider"]
             model_name = model["name"]
@@ -32,6 +40,7 @@ class SocialDesirabilityScoring:
 
                 print(f"{model_name} - Starting Scoring:")
 
+                # Loop over each item in Part I:
                 for i, item in enumerate(self.items):
                     print(i)
 
@@ -94,6 +103,7 @@ if __name__ == "__main__":
     api_handler = APIHandler()
     runner = LLMRunner(api_handler)
 
+    # Calibration set:
     models = [
         {"provider": "lmstudio", "name": "google/gemma-3-4b"},
         {"provider": "lmstudio", "name": "meta-llama-3-8b-instruct"},

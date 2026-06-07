@@ -1,3 +1,11 @@
+"""
+Helper dataclasses that make it more convenient to save model rankings
+Items are also stored here and out into appropriate formats
+
+Used extensively in partX_prompting.py scripts.
+"""
+
+
 from dataclasses import dataclass
 from typing import List, Dict, Optional
 

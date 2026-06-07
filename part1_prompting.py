@@ -1,8 +1,18 @@
-from __future__ import annotations
+"""
+Forced-Choice experiment for Part I:
+See Figure 3.2 for an overview.
 
+Uses:
+model_runner.py to make API calls
+
+Output:
+results for each model as pkl file containing elements from "Results"
+See structures.py for more information.
+"""
+
+from __future__ import annotations
 from model_runner import APIHandler, LLMRunner, validate_lmstudio_models
 from structures import build_part1_triads
-
 from pathlib import Path
 from textwrap import dedent
 import itertools
@@ -10,7 +20,6 @@ import json
 import pickle
 import re
 import time
-
 from structures import Result, Triad
 
 class ForcedChoiceExperiment:
@@ -28,12 +37,14 @@ class ForcedChoiceExperiment:
         self.runner = runner
         self.out_dir = Path(out_dir)
 
+    # Outer loop: Iter per model
     def run(self) -> None:
         print("Test starting:")
 
         for model in self.models:
             self.run_model(model)
 
+    # Inner, double loop: Iter per triad, per perm
     def run_model(self, model: dict) -> None:
         model_name = model["name"]
         provider = model["provider"]
@@ -43,7 +54,7 @@ class ForcedChoiceExperiment:
 
         results: list[Result] = []
         errors = 0
-
+        # Check to prepare LMStudio local model
         self.prepare_model(provider, model_name)
 
         try:
@@ -51,9 +62,12 @@ class ForcedChoiceExperiment:
                 print(f"Triad id: {triad.id}")
 
                 for perm_id, perm in enumerate(self.get_permutations(triad)):
+                    # Med-2508 ran into API timeouts:
                     if model_name == "mistral-medium-2508":
                         time.sleep(4)
 
+                    # Generate prompt using current perm:
+                    # Extract ranking from model
                     prompt = self.build_prompt(perm)
                     response = self.runner.generate_response(model, prompt)
                     ranking = self.parse_response(response, perm)
@@ -97,6 +111,7 @@ class ForcedChoiceExperiment:
     def get_permutations(triad: Triad):
         return list(itertools.permutations(triad.items))
 
+    # See section 3.4 for prompt information:
     @staticmethod
     def build_prompt(items: tuple) -> str:
         return dedent(f"""\
@@ -140,7 +155,7 @@ class ForcedChoiceExperiment:
             return None
         
 if __name__ == "__main__":
-    
+    # Calibration set
     models = [
         {"provider": "lmstudio", "name": "google/gemma-3-4b"},
         {"provider": "lmstudio", "name": "meta-llama-3-8b-instruct"},
@@ -153,7 +168,7 @@ if __name__ == "__main__":
         {"provider": "mistral", "name": "mistral-large-2512"},
         {"provider": "mistral", "name": "mistral-medium-2508"}
     ]
-
+    # Additional benchmark set
     models2 = [
         {"provider": "xai", "name": "grok-4.20-0309-reasoning"},
         {"provider": "xai", "name": "grok-4-1-fast-reasoning"},

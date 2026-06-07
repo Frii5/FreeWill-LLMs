@@ -9,11 +9,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from part1_scoring import analyze_model_pkl as analyze_part1
 from part2_scoring import analyze_model_pkl as analyze_part2
 
-
-# ----------------------------
-# config
-# ----------------------------
-
 FONT_SIZE = 12
 
 plt.rcParams["font.family"] = "Times New Roman"
@@ -66,11 +61,6 @@ FIG_WIDTH = 6
 ROW_HEIGHT = 0.33
 BW_METHOD = 0.45
 
-
-# ----------------------------
-# helpers
-# ----------------------------
-
 def pretty(name: str) -> str:
     return MODEL_NAME_MAP.get(name, name)
 
@@ -108,7 +98,6 @@ def kde_curve(values: np.ndarray, bw_method=None):
 
     return XGRID, y
 
-
 def row_ymax(analysis: dict, dims: list[str], bw_method=None):
     ymax = 0.0
     for dim in dims:
@@ -117,7 +106,6 @@ def row_ymax(analysis: dict, dims: list[str], bw_method=None):
             _, y = curve
             ymax = max(ymax, float(np.max(y)))
     return ymax if ymax > 0 else 1.0
-
 
 def draw_distribution(ax, values, point, color, alpha=0.26, lw=1.2, bw_method=None):
     curve = kde_curve(values, bw_method=bw_method)
@@ -131,7 +119,6 @@ def draw_distribution(ax, values, point, color, alpha=0.26, lw=1.2, bw_method=No
 
     ax.axvline(point, color=color, linewidth=1.0, alpha=0.95, zorder=4, clip_on=True)
 
-
 def style_panel(ax, ymax):
     ax.axvline(0, color="gray", linestyle="--", linewidth=0.7, alpha=0.55, zorder=1)
     ax.set_xlim(-1, 1)
@@ -141,11 +128,6 @@ def style_panel(ax, ymax):
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.spines["left"].set_visible(False)
-
-
-# ----------------------------
-# load analyses
-# ----------------------------
 
 part1 = {}
 for path in Path("results_FC_part1").glob("*.pkl"):
@@ -168,11 +150,6 @@ models = sorted(
     reverse=True,
 )
 n_rows = len(models)
-
-
-# ----------------------------
-# figure
-# ----------------------------
 
 fig, axes = plt.subplots(
     n_rows,
@@ -233,23 +210,10 @@ for i, model in enumerate(models):
         ax1.set_xticklabels([])
         ax2.set_xticklabels([])
 
-
-# ----------------------------
-# titles and ticks
-# ----------------------------
-
-#axes[0, 0].set_title("Part I", pad=6)
-#axes[0, 1].set_title("Part II", pad=6)
-
 for ax in axes[-1, :]:
     ax.set_xticks([-1, 0, 1])
     ax.set_xticklabels(["-1", "0", "1"])
     ax.tick_params(axis="x", labelsize=FONT_SIZE)
-
-
-# ----------------------------
-# layout
-# ----------------------------
 
 fig.subplots_adjust(
     left=0,
@@ -259,11 +223,6 @@ fig.subplots_adjust(
     wspace=0.12,
     hspace=0.35,
 )
-
-
-# ----------------------------
-# legends centered over the actual subplot areas
-# ----------------------------
 
 part1_handles = [
     plt.Line2D([0], [0], color=COLORS_1["FW"], lw=2, label="FW"),
@@ -299,11 +258,6 @@ fig.legend(
     ncol=2,
     frameon=False,
 )
-
-
-# ----------------------------
-# save
-# ----------------------------
 
 Path("Plotting").mkdir(parents=True, exist_ok=True)
 plt.savefig(OUTFILE, dpi=600, bbox_inches="tight")

@@ -1,9 +1,12 @@
+"""
+Block Design following section 3.6.
+"""
+
 import pandas as pd
 import itertools
 
 df = pd.read_csv("results_SDS/sds_scores_part1.csv")
-means = df["med"].values   # or "avg"
-
+means = df["med"].values 
 FW = range(5)
 DE = range(5)
 DU = range(5)
@@ -17,6 +20,7 @@ def get_pairs(i, j, k):
         ("DE", j, "DU", k)
     }
 
+# Generate all permutations of blocks and compute each spread/uniformity
 for de_perm in itertools.permutations(DE):
     for du_perm in itertools.permutations(DU):
         triads = []
@@ -45,11 +49,12 @@ for de_perm in itertools.permutations(DE):
 # unique spread levels, ascending
 spread_levels = sorted(set(r[0] for r in results))
 
-# allow best and second-best total spread
+# NOTE: If only one block has a minimum spread, allow higher to find the second block!
 allowed_spreads = set(spread_levels[:10])
 
+# Filter blocks:
 candidate_blocks = [r for r in results if r[0] in allowed_spreads]
-#candidate_blocks = results[:]
+
 # sort by spread first, then uniformity
 candidate_blocks.sort(key=lambda x: (x[0], x[1]))
 
@@ -70,20 +75,3 @@ for idx, (score, uniformity, triads) in enumerate(selected_blocks, 1):
     print("Uniformity:", uniformity)
     for t in triads:
         print(t)
-
-best_combo = None
-
-from itertools import combinations
-for combo in combinations(candidate_blocks, 4):
-    all_pairs = set()
-    ok = True
-    for _, _, _, pairs in combo:
-        if not all_pairs.isdisjoint(pairs):
-            ok = False
-            break
-        all_pairs |= pairs
-    if ok:
-        best_combo = combo
-        break
-
-print(best_combo is not None)

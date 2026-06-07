@@ -1,3 +1,13 @@
+"""
+Calculates Social Desirability Scores for Part II.
+Relies on model_runner.py to make API calls.
+
+Return:
+    SDS_scores csv.
+
+Also returns a prompt log due to a model returning errors,
+These can be manually checked and fixed with pkl_fixer.
+"""
 from pathlib import Path
 from textwrap import dedent
 import json

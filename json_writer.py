@@ -1,3 +1,11 @@
+"""
+Converts pkl files to JSON rankings:
+
+The rankings are extracted from the "Results" datastructures inside the JSONs,
+for each part. These are used in R to get the ranking matrix needed for Plackett-Luce.
+
+"""
+
 from pathlib import Path
 import json
 import pickle

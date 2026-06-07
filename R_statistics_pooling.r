@@ -63,13 +63,16 @@ prior <- list(
   Sigma = diag(1, ncol(X_pooled))
 )
 
+# Pooled Model fits for figures 4.3 and 4.5 ::: 
+
 mod <- PlackettLuce(R, normal = prior)
 qv <- qvcalc(mod)
 summary(qv)
 plot(qv, ylab = "Worth (log)", main = NULL)
 
-#############################################
+##############################################
 # General Linear Hypothesis Tests for Results:
+# See Appendix H for all tests.
 library(multcomp)
 
 b <- coef(mod, log = TRUE)
@@ -115,6 +118,9 @@ pair_glht <- function(item1, item2, mod, b = coef(mod, log = TRUE), V = vcov(mod
 #Insert Pairs here:
 pair_glht("MC6", "MC7", mod, b, V)
 ##################################
+
+# This bootstrap calculates data for the normalized worth figures
+# 4.4 and 4.6. Choose part at top of document and rerun for each.
 
 #Bootstrapping normalized worths:
 B <- 1000
@@ -188,11 +194,3 @@ axis(1, at = xpos, labels = items, las = 2)
 
 data.frame(worth = est, lower = ci[,1], upper = ci[,2])
 #######################################################
-
-
-
-
-
-
-
-

@@ -1,3 +1,12 @@
+"""
+model_runner.py is the interface used to make API calls.
+Also handles LMStudio. Local models need to be downloaded separately.
+
+Usage requires both classes:
+
+    api_handler = APIHandler()
+    runner = LLMRunner(api_handler)
+"""
 from openai import OpenAI
 from google import genai
 from google.genai import types
@@ -9,7 +18,6 @@ import os
 
 from xai_sdk import Client as XAIClient
 from xai_sdk.chat import user as xai_user
-
 
 def validate_lmstudio_models(models: list[dict[str, str]]) -> None:
     available_models = lms.list_downloaded_models("llm")
@@ -26,6 +34,11 @@ def validate_lmstudio_models(models: list[dict[str, str]]) -> None:
         raise ValueError(f"Invalid LM Studio model name(s): {invalid_models}")
 
 class APIHandler:
+    """
+    APIHandler initialize and manage the API calls for supported providers.
+    Each provider uses slightly different data structures.
+    Requires valid API keys to use, stored as environment variables.
+    """
     def __init__(self):
         self.openai_client = OpenAI()
         self.loaded_lmstudio_model = None
@@ -132,6 +145,9 @@ class APIHandler:
             self.loaded_lmstudio_model = None
 
 class LLMRunner:
+    """
+    Helper class to route each API prompt properly
+    """
     def __init__(self, api_handler: APIHandler) -> None:
         self.api_handler = api_handler
 

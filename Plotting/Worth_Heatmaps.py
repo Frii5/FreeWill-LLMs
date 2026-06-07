@@ -3,9 +3,6 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
 
-# -----------------------------
-# Settings
-# -----------------------------
 SAVE_FIGURES = True
 
 plt.rcParams["font.family"] = "Times New Roman"
@@ -27,15 +24,9 @@ COMPAT_COLOR = "#4640FF"
 INCOMPAT_COLOR = "#000000"   
 NEUTRAL_COLOR = "#5F5F5F"    
 
-# -----------------------------
-# Load data
-# -----------------------------
 df_part1 = pd.read_csv("worths_by_model_part1.csv").set_index("model")
 df_part2 = pd.read_csv("worths_by_model_part2.csv").set_index("model")
 
-# -----------------------------
-# Pretty model names
-# -----------------------------
 pretty_names = {
     "meta-llama-3-8b-instruct": "Llama 3 8B",
     "mistral-large-2512": "Mistral Large",
@@ -59,9 +50,6 @@ pretty_names = {
     "mistral-medium-2508": "Mistral Medium",
 }
 
-# -----------------------------
-# Item orders
-# -----------------------------
 item_order_part1 = [
     "FW1", "FW2", "FW3", "FW4", "FW5",
     "DE1", "DE2", "DE3", "DE4", "DE5",
@@ -76,35 +64,25 @@ item_order_part2 = [
 df_part1 = df_part1[item_order_part1]
 df_part2 = df_part2[item_order_part2]
 
-# -----------------------------
-# Part II item label colors
-# -----------------------------
 item_label_colors_part2 = {
-    # Incompatibilist
     "FC1": INCOMPAT_COLOR,
     "FC4": INCOMPAT_COLOR,
     "FC6": INCOMPAT_COLOR,
     "MC1": INCOMPAT_COLOR,
     "MC3": INCOMPAT_COLOR,
-
-    # Compatibilist
     "FC2": COMPAT_COLOR,
     "FC3": COMPAT_COLOR,
     "FC7": COMPAT_COLOR,
     "MC4": COMPAT_COLOR,
     "MC5": COMPAT_COLOR,
     "MC6": COMPAT_COLOR,
-
-    # Neutral
     "FC5": NEUTRAL_COLOR,
     "MC2": NEUTRAL_COLOR,
     "MC7": NEUTRAL_COLOR,
 }
 
-# -----------------------------
-# Hardcoded compatibilist contrasts
+# compatibilist contrasts
 # Used only for ordering rows
-# -----------------------------
 compat_scores = {
     "claude-haiku-4-5": 0.039715,
     "claude-opus-4-6": 0.071025,
@@ -134,15 +112,10 @@ model_order = sorted(
     reverse=True
 )
 
-# -----------------------------
 # Apply order and pretty names
-# -----------------------------
 df_part1 = df_part1.loc[model_order].rename(index=pretty_names)
 df_part2 = df_part2.loc[model_order].rename(index=pretty_names)
 
-# -----------------------------
-# Plot helper
-# -----------------------------
 def plot_heatmap(
     df,
     output_stem,
@@ -227,9 +200,6 @@ def plot_heatmap(
 
     plt.show()
 
-# -----------------------------
-# Main text: Part II
-# -----------------------------
 plot_heatmap(
     df=df_part2,
     output_stem="heatmap_part2",
@@ -238,9 +208,6 @@ plot_heatmap(
     item_label_colors=item_label_colors_part2
 )
 
-# -----------------------------
-# Appendix: Part I
-# -----------------------------
 plot_heatmap(
     df=df_part1,
     output_stem="heatmap_part1",

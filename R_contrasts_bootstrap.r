@@ -1,6 +1,7 @@
 library(jsonlite)
 library(PlackettLuce)
 
+# Same code as in the pooling script:
 part <- "part2"
 
 setwd("C:/Users/Friis/OneDrive/UNI/Bachelor Projekt/FreeWill-LLMs")
@@ -52,24 +53,15 @@ names(all_X_list) <- model_names
 
 X_pooled <- do.call(rbind, all_X_list)
 
-#############################################
-
+###################################
 # Bootstrapping, Worth-Contrasts
+####################################
 
-#############################################
-
-# =========================================================
-# MODEL NAMES
-# =========================================================
-
+# Model names:
 model_names <- tools::file_path_sans_ext(basename(json_files))
 names(all_X_list) <- model_names
 
-
-# =========================================================
-# CATEGORY DEFINITIONS
-# =========================================================
-
+# Define each category and residual:
 category_list <- list(
   incompatibilist = c("FC1", "FC4", "FC6", "MC1", "MC3"),
   compatibilist   = c("MC4", "MC5", "FC2", "FC3", "MC6", "FC7"),
@@ -90,11 +82,8 @@ category_table <- data.frame(
 
 print(category_table)
 
-
-# =========================================================
-# MODEL FUNCTIONS
-# =========================================================
-
+##################################
+# Functions to fit resampled model:
 B <- 1000
 set.seed(123)
 
@@ -139,11 +128,8 @@ summarise_boot <- function(x) {
   )
 }
 
-
-# =========================================================
-# ORIGINAL MODEL SCORES
-# =========================================================
-
+###########################
+# Original model fit scores:
 original_scores <- do.call(rbind, lapply(names(all_X_list), function(model) {
   worths <- fit_worths(all_X_list[[model]])
   scores <- category_scores(worths)
@@ -157,10 +143,8 @@ original_scores <- do.call(rbind, lapply(names(all_X_list), function(model) {
 
 print(original_scores)
 
-
-# =========================================================
-# BOOTSTRAP
-# =========================================================
+#######################
+### BOOTSTRAP START ###
 
 boot_results <- vector("list", B * length(all_X_list))
 counter <- 1
@@ -206,10 +190,8 @@ cat(
   "\n"
 )
 
-
-# =========================================================
-# PER-MODEL BOOTSTRAP SUMMARIES
-# =========================================================
+################
+# SUMMARIES
 
 per_model_mass_summary <- do.call(rbind, lapply(
   split(boot_results$mass_contrast, boot_results$model),
@@ -239,10 +221,8 @@ print(per_model_mass_summary)
 cat("\nPer-model mean-item contrast summary:\n")
 print(per_model_mean_summary)
 
-
-# =========================================================
-# GLOBAL BOOTSTRAP SUMMARIES
-# =========================================================
+##################
+# Global summaries
 
 global_total_mass <- tapply(
   boot_results$mass_contrast,
@@ -285,9 +265,7 @@ cat("\nGlobal mean mean-item contrast:\n")
 print(summarise_boot(global_mean_mean_item))
 
 
-# =========================================================
-# CORRELATION WITH INTELLIGENCE SCORES
-# =========================================================
+# Correlation tests + Linear model
 
 compat <- original_scores$mean_contrast
 
@@ -315,10 +293,18 @@ print(cor.test(cor_data$intelligence, cor_data$compatibilist_score, method = "sp
 cat("\nMean compatibilist score:\n")
 print(mean(cor_data$compatibilist_score))
 
+entropy <- c(
+  3.204, 2.829, 3.079, 2.88, 2.906,
+  2.943, 3.095, 3.045, 3.045, 3.207,
+  2.859, 3.006, 2.924, 2.93, 3.29,
+  2.64, 2.973, 3.188, 2.904, 3.682
+)
 
-# =========================================================
-# SAVE BOOTSTRAP RESULTS
-# =========================================================
+lm(compat ~ intel + entropy)
+summary(ml)
+
+# Save bootstrap results. These are used for the ridge plot
+# See Plotting/ridgeplot.py
 
 library(dplyr)
 library(tidyr)

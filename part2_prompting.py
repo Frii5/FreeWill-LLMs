@@ -1,8 +1,20 @@
-from __future__ import annotations
+"""
+Forced-Choice experiment for Part II:
+See Figure 3.2 for an overview.
 
+See part1_prompting.py for more information.
+Scripts are identical besides dyad handling.
+
+Uses:
+model_runner.py to make API calls
+
+Output:
+results for each model as pkl file containing elements from "Results"
+See structures.py for more information.
+"""
+from __future__ import annotations
 from model_runner import APIHandler, LLMRunner, validate_lmstudio_models
 from structures import build_part2_dyads
-
 from pathlib import Path
 from textwrap import dedent
 import itertools
@@ -10,9 +22,7 @@ import json
 import pickle
 import re
 import time
-
 from structures import Result, Dyad
-
 
 class ForcedChoiceExperiment:
     def __init__(

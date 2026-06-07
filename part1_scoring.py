@@ -1,3 +1,8 @@
+"""
+Scoring according to formulas (3.8),(3.9).
+The script calculates dimension scores over a bootstrap.
+Primarily for use in table 4.1
+"""
 import pickle
 from pathlib import Path
 from itertools import combinations
@@ -5,15 +10,14 @@ from collections import defaultdict
 import pandas as pd
 import random
 
-
+# Uses pkl files from .prompting.py 
 def load_results_pkl(filename):
     with open(filename, "rb") as f:
         return pickle.load(f)
 
-
+# Eq 3.8
 def rank_to_score(rank):
     return {1: 1, 2: 0, 3: -1}[rank]
-
 
 def compute_item_scores(results):
     item_scores = defaultdict(list)
@@ -24,7 +28,6 @@ def compute_item_scores(results):
 
     return {k: sum(v) / len(v) for k, v in item_scores.items()}
 
-
 def compute_dimension_scores(item_scores):
     dim_scores = {"FW": [], "DE": [], "DU": []}
 
@@ -34,7 +37,7 @@ def compute_dimension_scores(item_scores):
 
     return {k: sum(v) / len(v) for k, v in dim_scores.items()}
 
-
+# Eq 3.9
 def compute_ci(results):
     pair_counts = defaultdict(lambda: {"wins": 0, "losses": 0})
 
@@ -63,7 +66,6 @@ def compute_ci(results):
 
     return majority_sum / total_comparisons if total_comparisons > 0 else float("nan")
 
-
 def percentile(sorted_values, p):
     """
     p in [0, 100]
@@ -85,7 +87,6 @@ def percentile(sorted_values, p):
     d0 = sorted_values[f] * (c - k)
     d1 = sorted_values[c] * (k - f)
     return d0 + d1
-
 
 def bootstrap_metrics(results, n_boot=5000, seed=42):
     rng = random.Random(seed)
@@ -130,10 +131,8 @@ def bootstrap_metrics(results, n_boot=5000, seed=42):
         }
     }
 
-
 def model_name_from_filename(filename):
     return Path(filename).stem.replace("__", "/")
-
 
 def analyze_model_pkl(filename, n_boot=5000):
     results = load_results_pkl(filename)
@@ -151,7 +150,6 @@ def analyze_model_pkl(filename, n_boot=5000):
         "CI": ci,
         "bootstrap": boot,
     }
-
 
 if __name__ == "__main__":
     rows = []
