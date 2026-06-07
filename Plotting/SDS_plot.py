@@ -7,9 +7,8 @@ from matplotlib import colors as mcolors
 ROOT = Path(__file__).resolve().parent.parent
 
 # ---------- font ----------
-plt.rcParams["font.family"] = "Palatino Linotype"      
-plt.rcParams["font.size"] = 12
-plt.rcParams["font.weight"] = "bold"
+plt.rcParams["font.family"] = "Times New Roman"      
+plt.rcParams["font.size"] = 20
 
 # ---------- helper ----------
 def darken(color, factor=0.72):
@@ -25,7 +24,7 @@ def lighten(color, factor=1.18):
     )
 
 # ---------- data ----------
-part1 = pd.read_csv(ROOT / "data_new_prompt.csv")
+part1 = pd.read_csv(ROOT / "results_SDS/sds_scores_part1.csv")
 part2 = pd.read_csv(ROOT / "results_SDS/sds_scores_part2.csv")
 
 part1["dimension"] = ["FW"] * 5 + ["DE"] * 5 + ["DU"] * 5
@@ -50,11 +49,11 @@ colors = {
 }
 
 labels = {
-    "FW": "Free Will (FW)",
-    "DE": "Determinism (DE)",
-    "DU": "Duality (DU)",
-    "FC": "Free Will Concepts (FC)",
-    "MC": "Moral Concepts (MC)",
+    "FW": "FW",
+    "DE": "DE",
+    "DU": "DU",
+    "FC": "FC",
+    "MC": "MC",
 }
 
 # ---------- plot ----------
@@ -86,7 +85,7 @@ for dim in ["FW", "DE", "DU", "FC", "MC"]:
         zorder=5                  # float on top
     )
 
-ax.set_xlabel("Item")
+#ax.set_xlabel("Item")
 ax.set_ylabel("Social Desirability Score")
 ax.set_xlim(0.3, len(df) + 0.7)
 ax.set_ylim(0, max(10, df["med"].max() + 0.5))

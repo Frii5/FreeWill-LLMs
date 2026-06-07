@@ -181,4 +181,4 @@ if __name__ == "__main__":
 
     df = pd.DataFrame(rows)
     benchmark_df = df.sort_values("FW", axis=0)
-    benchmark_df.to_csv("Benchmark_table_part1.csv", index=False)
+    benchmark_df.to_csv("results_tables/Benchmark_table_part1.csv", index=False)

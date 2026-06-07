@@ -14,9 +14,15 @@ from part2_scoring import analyze_model_pkl as analyze_part2
 # config
 # ----------------------------
 
-plt.rcParams["font.family"] = "Palatino Linotype"      
-plt.rcParams["font.size"] = 12
-plt.rcParams["font.weight"] = "bold"
+FONT_SIZE = 12
+
+plt.rcParams["font.family"] = "Times New Roman"
+plt.rcParams["font.size"] = FONT_SIZE
+plt.rcParams["axes.titlesize"] = FONT_SIZE
+plt.rcParams["axes.labelsize"] = FONT_SIZE
+plt.rcParams["xtick.labelsize"] = FONT_SIZE
+plt.rcParams["ytick.labelsize"] = FONT_SIZE
+plt.rcParams["legend.fontsize"] = FONT_SIZE
 
 OUTFILE = "Plotting/bootstrapped_dimensions.svg"
 N_BOOT = 5000
@@ -56,10 +62,9 @@ COLORS_2 = {
 }
 
 XGRID = np.linspace(-1, 1, 400)
-FIG_WIDTH = 8.2
+FIG_WIDTH = 6
 ROW_HEIGHT = 0.33
 BW_METHOD = 0.45
-# e.g. BW_METHOD = 0.8 for a bit less smoothing
 
 
 # ----------------------------
@@ -157,7 +162,11 @@ for path in Path("results_FC_part2").glob("*.pkl"):
 if not part1:
     raise ValueError("No part I .pkl files found in results_FC_part1")
 
-models = sorted(part1.keys(), key=lambda m: part1[m]["dimension_scores"]["FW"], reverse=True)
+models = sorted(
+    part1.keys(),
+    key=lambda m: part1[m]["dimension_scores"]["FW"],
+    reverse=True,
+)
 n_rows = len(models)
 
 
@@ -176,7 +185,7 @@ fig, axes = plt.subplots(
 for i, model in enumerate(models):
     ax1, ax2 = axes[i, 0], axes[i, 1]
 
-    # ----- part I -----
+    # ----- Part I -----
     a1 = part1[model]
     ymax1 = row_ymax(a1, ["FW", "DE", "DU"], bw_method=BW_METHOD)
 
@@ -197,11 +206,11 @@ for i, model in enumerate(models):
         rotation=0,
         ha="right",
         va="center",
-        labelpad=34,
-        fontsize=8.5,
+        labelpad=10,
+        fontsize=FONT_SIZE,
     )
 
-    # ----- part II -----
+    # ----- Part II -----
     if model in part2:
         a2 = part2[model]
         ymax2 = row_ymax(a2, ["FC", "MC"], bw_method=BW_METHOD)
@@ -224,47 +233,78 @@ for i, model in enumerate(models):
         ax1.set_xticklabels([])
         ax2.set_xticklabels([])
 
-# titles
-axes[0, 0].set_title("Part I", fontsize=11, pad=6)
-axes[0, 1].set_title("Part II", fontsize=11, pad=6)
 
-# bottom ticks
+# ----------------------------
+# titles and ticks
+# ----------------------------
+
+#axes[0, 0].set_title("Part I", pad=6)
+#axes[0, 1].set_title("Part II", pad=6)
+
 for ax in axes[-1, :]:
     ax.set_xticks([-1, 0, 1])
     ax.set_xticklabels(["-1", "0", "1"])
-    ax.tick_params(axis="x", labelsize=8)
+    ax.tick_params(axis="x", labelsize=FONT_SIZE)
+
+
+# ----------------------------
+# layout
+# ----------------------------
 
 fig.subplots_adjust(
-    left=0.28,
+    left=0,
     right=0.98,
-    top=0.93,
+    top=0.91,
     bottom=0.08,
     wspace=0.12,
     hspace=0.35,
 )
+
+
+# ----------------------------
+# legends centered over the actual subplot areas
+# ----------------------------
 
 part1_handles = [
     plt.Line2D([0], [0], color=COLORS_1["FW"], lw=2, label="FW"),
     plt.Line2D([0], [0], color=COLORS_1["DE"], lw=2, label="DE"),
     plt.Line2D([0], [0], color=COLORS_1["DU"], lw=2, label="DU"),
 ]
+
 part2_handles = [
     plt.Line2D([0], [0], color=COLORS_2["FC"], lw=2, label="FC"),
     plt.Line2D([0], [0], color=COLORS_2["MC"], lw=2, label="MC"),
 ]
 
+pos1 = axes[0, 0].get_position()
+pos2 = axes[0, 1].get_position()
+
+x1 = pos1.x0 + pos1.width / 2
+x2 = pos2.x0 + pos2.width / 2
+
 fig.legend(
-    part1_handles, ["FW", "DE", "DU"],
-    loc="upper center", bbox_to_anchor=(0.33, 0.995),
-    ncol=3, frameon=False, fontsize=8
-)
-fig.legend(
-    part2_handles, ["FC", "MC"],
-    loc="upper center", bbox_to_anchor=(0.78, 0.995),
-    ncol=2, frameon=False, fontsize=8
+    handles=part1_handles,
+    labels=["FW", "DE", "DU"],
+    loc="upper center",
+    bbox_to_anchor=(x1, 0.995),
+    ncol=3,
+    frameon=False,
 )
 
-fig.supxlabel("Dimension score", fontsize=10)
+fig.legend(
+    handles=part2_handles,
+    labels=["FC", "MC"],
+    loc="upper center",
+    bbox_to_anchor=(x2, 0.995),
+    ncol=2,
+    frameon=False,
+)
 
-plt.savefig(OUTFILE, dpi=300, bbox_inches="tight")
+
+# ----------------------------
+# save
+# ----------------------------
+
+Path("Plotting").mkdir(parents=True, exist_ok=True)
+plt.savefig(OUTFILE, dpi=600, bbox_inches="tight")
 plt.show()
