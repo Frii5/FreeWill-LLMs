@@ -1,12 +1,47 @@
-# FreeWill-LLMs
+# Bachelors Thesis Codebase
 
 GitHub code base for the Bachelors Thesis:
 
-Is Free Will Compatible With Determinism?
-A Psychometric Study Of Large Language Models
+Is Free Will Compatible With Determinism? A Psychometric Study Of Large Language Models
 
-Link to the FWI: https://www.sciencedirect.com/science/article/abs/pii/S1053810014000075
-                              
+The Free Will Inventory by Nadelhoffer et al.:
+* https://www.sciencedirect.com/science/article/abs/pii/S1053810014000075
+
+Vendor API documentation:
+* https://api-docs.deepseek.com/
+* https://developers.openai.com/api/docs
+* https://docs.mistral.ai/
+* https://platform.claude.com/docs/en/home
+* https://ai.google.dev/gemini-api/docs
+* https://grok-api.apidog.io/
+* https://lmstudio.ai/docs/python
+
+# Requirements:
+All code tested using Python 3.12.9.
+
+## Python Packages
+* openai
+* google-genai
+* anthropic
+* mistralai
+* lmstudio
+* xai-sdk
+* pandas==2.1.0
+* numpy==1.25.2
+* matplotlib==3.6.3
+* scipy==1.12.0
+* ridgeplot
+* plotly
+* kaleido
+* seaborn
+
+## R packages
+* jsonlite
+* PlackettLuce
+* qvcalc
+* dplyr
+
+# Directory
 ```text                              
 FreeWill-LLMs/                              
 ├── deprecated/               # Old files, can be ignored
